@@ -17,6 +17,10 @@ export default class App extends React.Component {
 				strategy: hashtagStrategy,
 				component: HashtagSpan,
 			},
+			{
+				strategy: numberStrategy,
+				component: NumberSpan,
+			},
 		]);
     this.state = {
       editorState: EditorState.createEmpty(compositeDecorator),
@@ -58,6 +62,7 @@ export default class App extends React.Component {
  */
 const HANDLE_REGEX = /@[\w]+/g;
 const HASHTAG_REGEX = /#[\w\u0590-\u05ff]+/g;
+const NUMBER_REGEX = /\d/g;
 
 const HandleStyle = {
 	backgroundColor:"#FFCACA"
@@ -67,12 +72,20 @@ const HashtagStyle = {
 	backgroundColor:"#FFE564"
 };
 
+const NumberStyle = {
+	backgroundColor:"#00FF2D"
+};
+
 function handleStrategy(contentBlock, callback, contentState) {
 	findWithRegex(HANDLE_REGEX, contentBlock, callback);
 }
 
 function hashtagStrategy(contentBlock, callback, contentState) {
 	findWithRegex(HASHTAG_REGEX, contentBlock, callback);
+}
+
+function numberStrategy(contentBlock, callback, contentState) {
+	findWithRegex(NUMBER_REGEX, contentBlock, callback);
 }
 
 function findWithRegex(regex, contentBlock, callback) {
@@ -106,4 +119,16 @@ const HashtagSpan = (props) => {
 			{props.children}
 		</span>
 	);
+
 };
+
+const NumberSpan = (props) => {
+	return (
+		<span
+      style={NumberStyle}
+			data-offset-key={props.offsetKey}
+		>
+			{props.children}
+		</span>
+	);
+}
