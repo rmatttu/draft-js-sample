@@ -39,13 +39,21 @@ export default class App extends React.Component {
   }
 
   _tryCalculate(formula) {
+    const ans = this.answers
+    function getAnswer(n) {
+      if(n < 0 || ans.length < n) {
+        return NaN
+      }
+      return ans[n]
+    }
+
     let f = null
     try {
-      f = new Function('"use strict";return (' + formula + ')')
+      f = Function("ans", '"use strict"; return (' + formula + ')')
     } catch (e) {
       return NaN
     }
-    return f()
+    return f(getAnswer)
   }
 
   handleKeyCommand(command) {
@@ -82,7 +90,7 @@ export default class App extends React.Component {
       <div>
         {this.answers.map((value, index) => `ans[${index}]: ${value}`).join(" | ")}
       </div>
-      <br/>
+      <br />
       <div>
         {JSON.stringify(convertToRaw(this.state.editorState.getCurrentContent()))}
       </div>
@@ -109,7 +117,7 @@ const HashtagStyle = {
 };
 
 const NumberStyle = {
-  backgroundColor: "#00FF2D"
+  backgroundColor: "#A9FFB9"
 };
 
 function handleStrategy(contentBlock, callback, contentState) {
