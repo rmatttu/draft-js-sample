@@ -1,5 +1,5 @@
 import React from 'react'
-import { Editor, EditorState, RichUtils, CompositeDecorator, convertToRaw } from 'draft-js';
+import { Editor, EditorState, RichUtils, CompositeDecorator, convertToRaw, getDefaultKeyBinding } from 'draft-js';
 import logo from './logo.svg';
 import './App.css';
 import './component.css'
@@ -30,27 +30,25 @@ export default class App extends React.Component {
 
   onChange(editorState) {
     this.setState({ editorState })
-    const content = this.state.editorState.getCurrentContent()
-    const blocks = content.getBlocksAsArray()
-    this.answers = blocks.map(i => this.tryCalculate(i.getText()))
-    console.log(this.answers)
   }
 
-  tryCalculate(formula) {
+  onCalculate() {
+    const content = this.state.editorState.getCurrentContent()
+    const blocks = content.getBlocksAsArray()
+    this.answers = blocks.map(i => this._tryCalculate(i.getText()))
+  }
+
+  _tryCalculate(formula) {
     let f = null
     try {
       f = new Function('"use strict";return (' + formula + ')')
     } catch (e) {
-      console.log(e)
       return NaN
-      // if (e instanceof SyntaxError) {
-      // }
     }
     return f()
   }
 
   handleKeyCommand(command) {
-    console.log(command)
     const newState = RichUtils.handleKeyCommand(this.state.editorState, command)
     if (newState) {
       this.onChange(newState)
@@ -58,6 +56,13 @@ export default class App extends React.Component {
       return true
     }
     return false
+  }
+
+  myKeyBindingFn = (e) => {
+    if (e.key === "Enter") {
+      this.onCalculate()
+    }
+    return getDefaultKeyBinding(e)
   }
 
   render() {
@@ -71,11 +76,13 @@ export default class App extends React.Component {
           editorState={this.state.editorState}
           onChange={this.onChange.bind(this)}
           handleKeyCommand={this.handleKeyCommand.bind(this)}
+          keyBindingFn={this.myKeyBindingFn}
         />
       </div>
       <div>
         {this.answers.map((value, index) => `ans[${index}]: ${value}`).join(" | ")}
       </div>
+      <br/>
       <div>
         {JSON.stringify(convertToRaw(this.state.editorState.getCurrentContent()))}
       </div>
