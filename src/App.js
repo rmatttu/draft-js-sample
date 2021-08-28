@@ -1,5 +1,6 @@
 import React from 'react'
 import { Editor, EditorState, RichUtils, CompositeDecorator, convertToRaw, getDefaultKeyBinding } from 'draft-js';
+import { evaluate } from 'mathjs'
 import logo from './logo.svg';
 import './App.css';
 import './component.css'
@@ -47,13 +48,11 @@ export default class App extends React.Component {
       return ans[n]
     }
 
-    let f = null
     try {
-      f = Function("ans", '"use strict"; return (' + formula + ')')
+      return evaluate(formula)
     } catch (e) {
       return NaN
     }
-    return f(getAnswer)
   }
 
   handleKeyCommand(command) {
