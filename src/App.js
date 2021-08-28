@@ -1,5 +1,5 @@
 import React from 'react'
-import {Editor, EditorState, RichUtils, CompositeDecorator} from 'draft-js';
+import {Editor, EditorState, RichUtils, CompositeDecorator, convertToRaw} from 'draft-js';
 import logo from './logo.svg';
 import './App.css';
 import './component.css'
@@ -25,11 +25,30 @@ export default class App extends React.Component {
     this.state = {
       editorState: EditorState.createEmpty(compositeDecorator),
     }
+		this.answers = []
   }
 
   onChange(editorState) {
     this.setState({editorState})
+		const content = this.state.editorState.getCurrentContent()
+		const blocks = content.getBlocksAsArray()
+		this.answers = blocks.map(i => this.tryCalculate(i.getText()))
+		console.log(this.answers)
   }
+
+	tryCalculate(formula) {
+		let f = null
+		try {
+			f = new Function('"use strict";return (' + formula + ')')
+		} catch (e) {
+			console.log(e)
+			return NaN
+			// if (e instanceof SyntaxError) {
+			// }
+		}
+		return f()
+	}
+
 	handleKeyCommand(command) {
     console.log(command)
 		const newState = RichUtils.handleKeyCommand(this.state.editorState, command)
@@ -43,13 +62,23 @@ export default class App extends React.Component {
 
   render() {
     return <div>
-    <h1>Draft.js example</h1>
-    <img src={logo} className="App-logo" alt="logo" />
-      <Editor
-        editorState={this.state.editorState}
-        onChange={this.onChange.bind(this)}
-        handleKeyCommand={this.handleKeyCommand.bind(this)}
-      />
+			<h1>Draft.js example</h1>
+			<div>
+				<img src={logo} className="App-logo" alt="logo" />
+			</div>
+			<div>
+				<Editor
+					editorState={this.state.editorState}
+					onChange={this.onChange.bind(this)}
+					handleKeyCommand={this.handleKeyCommand.bind(this)}
+				/>
+			</div>
+			<div>
+				{this.answers.map((value, index) => `ans[${index}]: ${value}`).join(" | ")}
+			</div>
+			<div>
+				{JSON.stringify(convertToRaw(this.state.editorState.getCurrentContent()))}
+			</div>
     </div>
   }
 
